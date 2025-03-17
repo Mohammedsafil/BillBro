@@ -86,9 +86,9 @@ class _HomePageState extends State<HomePage> {
           "BillBro",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.person_outline), onPressed: () {}),
-        ],
+        // actions: [
+        //   IconButton(icon: const Icon(Icons.person_outline), onPressed: () {}),
+        // ],
       ),
       body: Column(
         children: [
@@ -317,7 +317,7 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           '₹${_totalAmount.toStringAsFixed(2)}',
                           style: GoogleFonts.inter(
-                            fontSize: 19,
+                            fontSize: 18,
                             fontWeight: FontWeight.w400,
                             color: Theme.of(context).colorScheme.onPrimary
                           ),
