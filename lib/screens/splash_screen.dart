@@ -86,15 +86,16 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Transform.scale(
                         scale: _pulseAnimation.value,
                         child: Container(
+                          width: 150,
+                          height: 150,
                           padding: const EdgeInsets.all(20),
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            Icons.receipt_long,
-                            size: 60,
-                            color: Theme.of(context).colorScheme.primary,
+                          child: Image.asset(
+                            'lib/assets/logo.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
