@@ -10,6 +10,18 @@ class Item {
   });
 }
 
+class SelectedItem {
+  final Item item;
+  final int quantity;
+  final double total;
+
+  SelectedItem({
+    required this.item,
+    required this.quantity,
+    required this.total,
+  });
+}
+
 // Temporary database items (replace with actual database later)
 final List<Item> dummyItems = [
   Item(id: '1', name: 'Item 1', price: 100.0),

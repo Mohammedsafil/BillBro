@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import '../models/item.dart';
+import '../widgets/invoice_preview.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,9 +39,9 @@ class _HomePageState extends State<HomePage> {
 
   void _addItemToList() {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an item')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an item')),
+      );
       return;
     }
 
@@ -64,7 +65,6 @@ class _HomePageState extends State<HomePage> {
       _quantityController.clear();
     });
 
-    // Scroll to bottom when new item is added
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
@@ -72,6 +72,17 @@ class _HomePageState extends State<HomePage> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  void _showInvoicePreview() {
+    showDialog(
+      context: context,
+      builder: (context) => InvoicePreview(
+        items: _selectedItems,
+        total: _totalAmount,
+        date: _currentTime,
+      ),
+    );
   }
 
   double get _totalAmount =>
@@ -86,9 +97,6 @@ class _HomePageState extends State<HomePage> {
           "BillBro",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
-        // actions: [
-        //   IconButton(icon: const Icon(Icons.person_outline), onPressed: () {}),
-        // ],
       ),
       body: Column(
         children: [
@@ -104,16 +112,15 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Date: "+_currentTime.toString().substring(0, 11),
+                      "Date: " + _currentTime.toString().substring(0, 11),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
                       ),
                     ),
-
                     Text(
-                      "Time: "+_currentTime.toString().substring(11, 16),
+                      "Time: " + _currentTime.toString().substring(11, 16),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -150,16 +157,15 @@ class _HomePageState extends State<HomePage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              items:
-                                  dummyItems.map((Item item) {
-                                    return DropdownMenuItem<Item>(
-                                      value: item,
-                                      child: Text(
-                                        '${item.name} - ₹${item.price}',
-                                        style: GoogleFonts.inter(),
-                                      ),
-                                    );
-                                  }).toList(),
+                              items: dummyItems.map((Item item) {
+                                return DropdownMenuItem<Item>(
+                                  value: item,
+                                  child: Text(
+                                    '${item.name} - ₹${item.price}',
+                                    style: GoogleFonts.inter(),
+                                  ),
+                                );
+                              }).toList(),
                               onChanged: (Item? value) {
                                 setState(() {
                                   _selectedItem = value;
@@ -188,8 +194,7 @@ class _HomePageState extends State<HomePage> {
                         icon: const Icon(Icons.add_shopping_cart),
                         label: Text('Add to List', style: GoogleFonts.inter()),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 45),
                         ),
@@ -287,68 +292,55 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar:
-          _selectedItems.isNotEmpty
-              ? Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Total: ',
-                          style: GoogleFonts.inter(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
+      bottomNavigationBar: _selectedItems.isNotEmpty
+          ? Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Total: ',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
-                        Text(
-                          '₹${_totalAmount.toStringAsFixed(2)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: Theme.of(context).colorScheme.onPrimary
-                          ),
-                        ),
-                      ],
-                    ),
-                    FloatingActionButton.extended(
-                      onPressed: () {},
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      icon: const Icon(Icons.receipt_long),
-                      label: Text(
-                        'Generate Bill',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                       ),
+                      Text(
+                        '₹${_totalAmount.toStringAsFixed(2)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  FloatingActionButton.extended(
+                    onPressed: _showInvoicePreview,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    icon: const Icon(Icons.receipt_long),
+                    label: Text(
+                      'Generate Bill',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                     ),
-                  ],
-                ),
-              )
-              : null,
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
-}
-
-class SelectedItem {
-  final Item item;
-  final int quantity;
-  final double total;
-
-  SelectedItem({
-    required this.item,
-    required this.quantity,
-    required this.total,
-  });
 }
