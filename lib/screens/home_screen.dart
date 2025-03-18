@@ -17,14 +17,24 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _quantityController = TextEditingController();
   final List<SelectedItem> _selectedItems = [];
   final ScrollController _scrollController = ScrollController();
+  List<Item> _items = []; // List to hold fetched items
+  bool _isLoading = true; // Loading state
 
   @override
   void initState() {
     super.initState();
+    _fetchItems(); // Fetch items from Firestore
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _currentTime = DateTime.now();
       });
+    });
+  }
+
+  Future<void> _fetchItems() async {
+    _items = await fetchItemsFromFirestore();
+    setState(() {
+      _isLoading = false; // Update loading state
     });
   }
 
@@ -64,7 +74,6 @@ class _HomePageState extends State<HomePage> {
       _quantityController.clear();
     });
 
-    // Scroll to bottom when new item is added
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
@@ -86,207 +95,221 @@ class _HomePageState extends State<HomePage> {
           "BillBro",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
-        // actions: [
-        //   IconButton(icon: const Icon(Icons.person_outline), onPressed: () {}),
-        // ],
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Date: "+_currentTime.toString().substring(0, 11),
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    Text(
-                      "Time: "+_currentTime.toString().substring(11, 16),
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<Item>(
-                              value: _selectedItem,
-                              decoration: InputDecoration(
-                                labelText: 'Select Item',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              items:
-                                  dummyItems.map((Item item) {
-                                    return DropdownMenuItem<Item>(
-                                      value: item,
-                                      child: Text(
-                                        '${item.name} - ₹${item.price}',
-                                        style: GoogleFonts.inter(),
-                                      ),
-                                    );
-                                  }).toList(),
-                              onChanged: (Item? value) {
-                                setState(() {
-                                  _selectedItem = value;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _quantityController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Qty',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: _addItemToList,
-                        icon: const Icon(Icons.add_shopping_cart),
-                        label: Text('Add to List', style: GoogleFonts.inter()),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 45),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body:
+          _isLoading
+              ? Center(
+                child: CircularProgressIndicator(),
+              ) // Show loading indicator
+              : Column(
                 children: [
-                  Text(
-                    'Selected Items',
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: _selectedItems.length,
-                      itemBuilder: (context, index) {
-                        final item = _selectedItems[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Date: " +
+                                  _currentTime.toString().substring(0, 11),
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              "Time: " +
+                                  _currentTime.toString().substring(11, 16),
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
                           padding: const EdgeInsets.all(15),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 10,
-                                offset: const Offset(0, 2),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
                             children: [
-                              Expanded(
-                                flex: 2,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.item.name,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: DropdownButtonFormField<Item>(
+                                      value: _selectedItem,
+                                      decoration: InputDecoration(
+                                        labelText: 'Select Item',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      items:
+                                          _items.map((Item item) {
+                                            return DropdownMenuItem<Item>(
+                                              value: item,
+                                              child: Text(
+                                                '${item.name} - ₹${item.price}',
+                                                style: GoogleFonts.inter(),
+                                              ),
+                                            );
+                                          }).toList(),
+                                      onChanged: (Item? value) {
+                                        setState(() {
+                                          _selectedItem = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _quantityController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        labelText: 'Qty',
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    Text(
-                                      '₹${item.item.price} × ${item.quantity}',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                '₹${item.total}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Theme.of(context).colorScheme.primary,
+                              const SizedBox(height: 10),
+                              ElevatedButton.icon(
+                                onPressed: _addItemToList,
+                                icon: const Icon(Icons.add_shopping_cart),
+                                label: Text(
+                                  'Add to List',
+                                  style: GoogleFonts.inter(),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                color: Colors.red,
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedItems.removeAt(index);
-                                  });
-                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(double.infinity, 45),
+                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Selected Items',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: _selectedItems.length,
+                              itemBuilder: (context, index) {
+                                final item = _selectedItems[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.item.name,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            Text(
+                                              '₹${item.item.price} × ${item.quantity}',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        '₹${item.total}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        color: Colors.red,
+                                        onPressed: () {
+                                          setState(() {
+                                            _selectedItems.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
       bottomNavigationBar:
           _selectedItems.isNotEmpty
               ? Container(
@@ -319,13 +342,13 @@ class _HomePageState extends State<HomePage> {
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
-                            color: Theme.of(context).colorScheme.onPrimary
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ],
                     ),
                     FloatingActionButton.extended(
-                      onPressed: () {},
+                      onPressed: null,
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                       icon: const Icon(Icons.receipt_long),
                       label: Text(
