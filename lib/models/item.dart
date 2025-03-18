@@ -1,31 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Item {
   final String id;
   final String name;
   final double price;
 
-  Item({
-    required this.id,
-    required this.name,
-    required this.price,
-  });
+  Item({required this.id, required this.name, required this.price});
+
+  factory Item.fromFirestore(DocumentSnapshot doc) {
+    return Item(
+      id: doc.id,
+      name: doc['name'],
+      price: (doc['price'] as num).toDouble(),
+    );
+  }
 }
 
-class SelectedItem {
-  final Item item;
-  final int quantity;
-  final double total;
 
-  SelectedItem({
-    required this.item,
-    required this.quantity,
-    required this.total,
-  });
+Future<List<Item>> fetchItemsFromFirestore() async {
+  try {
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('items').get();
+    return querySnapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
+  } catch (e) {
+    print("Firestore fetch error: $e");
+    return [];
+  }
 }
 
-// Temporary database items (replace with actual database later)
-final List<Item> dummyItems = [
-  Item(id: '1', name: 'Item 1', price: 100.0),
-  Item(id: '2', name: 'Item 2', price: 150.0),
-  Item(id: '3', name: 'Item 3', price: 200.0),
-  Item(id: '4', name: 'Item 4', price: 250.0),
-];
