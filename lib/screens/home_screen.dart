@@ -39,9 +39,9 @@ class _HomePageState extends State<HomePage> {
 
   void _addItemToList() {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an item')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select an item')));
       return;
     }
 
@@ -77,11 +77,12 @@ class _HomePageState extends State<HomePage> {
   void _showInvoicePreview() {
     showDialog(
       context: context,
-      builder: (context) => InvoicePreview(
-        items: _selectedItems,
-        total: _totalAmount,
-        date: _currentTime,
-      ),
+      builder:
+          (context) => InvoicePreview(
+            items: _selectedItems,
+            total: _totalAmount,
+            date: _currentTime,
+          ),
     );
   }
 
@@ -97,6 +98,18 @@ class _HomePageState extends State<HomePage> {
           "BillBro",
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Image.asset(
+              'lib/assets/logo.png',
+              width: 150,
+              height: 200,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(width: 30),
+        ],
       ),
       body: Column(
         children: [
@@ -157,15 +170,16 @@ class _HomePageState extends State<HomePage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              items: dummyItems.map((Item item) {
-                                return DropdownMenuItem<Item>(
-                                  value: item,
-                                  child: Text(
-                                    '${item.name} - ₹${item.price}',
-                                    style: GoogleFonts.inter(),
-                                  ),
-                                );
-                              }).toList(),
+                              items:
+                                  dummyItems.map((Item item) {
+                                    return DropdownMenuItem<Item>(
+                                      value: item,
+                                      child: Text(
+                                        '${item.name} - ₹${item.price}',
+                                        style: GoogleFonts.inter(),
+                                      ),
+                                    );
+                                  }).toList(),
                               onChanged: (Item? value) {
                                 setState(() {
                                   _selectedItem = value;
@@ -194,7 +208,8 @@ class _HomePageState extends State<HomePage> {
                         icon: const Icon(Icons.add_shopping_cart),
                         label: Text('Add to List', style: GoogleFonts.inter()),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 45),
                         ),
@@ -292,55 +307,56 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: _selectedItems.isNotEmpty
-          ? Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Total: ',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                      Text(
-                        '₹${_totalAmount.toStringAsFixed(2)}',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  FloatingActionButton.extended(
-                    onPressed: _showInvoicePreview,
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    icon: const Icon(Icons.receipt_long),
-                    label: Text(
-                      'Generate Bill',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+      bottomNavigationBar:
+          _selectedItems.isNotEmpty
+              ? Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
                     ),
-                  ),
-                ],
-              ),
-            )
-          : null,
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Total: ',
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                        Text(
+                          '₹${_totalAmount.toStringAsFixed(2)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    FloatingActionButton.extended(
+                      onPressed: _showInvoicePreview,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      icon: const Icon(Icons.receipt_long),
+                      label: Text(
+                        'Generate Bill',
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              : null,
     );
   }
 }
