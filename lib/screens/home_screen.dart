@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import '../models/item.dart';
+import '../widgets/invoice_preview.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,9 +49,9 @@ class _HomePageState extends State<HomePage> {
 
   void _addItemToList() {
     if (_selectedItem == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an item')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an item')),
+      );
       return;
     }
 
@@ -83,6 +84,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _showInvoicePreview() {
+    showDialog(
+      context: context,
+      builder: (context) => InvoicePreview(
+        items: _selectedItems,
+        total: _totalAmount,
+        date: _currentTime,
+      ),
+    );
+  }
+
   double get _totalAmount =>
       _selectedItems.fold<double>(0, (sum, item) => sum + item.total);
 
@@ -96,6 +108,7 @@ class _HomePageState extends State<HomePage> {
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
       ),
+
       body:
           _isLoading
               ? Center(
@@ -107,6 +120,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
+
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +136,8 @@ class _HomePageState extends State<HomePage> {
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
-                            ),
+
+
                             Text(
                               "Time: " +
                                   _currentTime.toString().substring(11, 16),
@@ -132,7 +147,9 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.white,
                               ),
                             ),
+
                           ],
+
                         ),
                         const SizedBox(height: 20),
                         Container(
@@ -310,6 +327,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+
       bottomNavigationBar:
           _selectedItems.isNotEmpty
               ? Container(
@@ -354,24 +372,23 @@ class _HomePageState extends State<HomePage> {
                       label: Text(
                         'Generate Bill',
                         style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+
                       ),
+                    ],
+                  ),
+                  FloatingActionButton.extended(
+                    onPressed: _showInvoicePreview,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    icon: const Icon(Icons.receipt_long),
+                    label: Text(
+                      'Generate Bill',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                     ),
-                  ],
-                ),
-              )
-              : null,
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
-}
-
-class SelectedItem {
-  final Item item;
-  final int quantity;
-  final double total;
-
-  SelectedItem({
-    required this.item,
-    required this.quantity,
-    required this.total,
-  });
 }

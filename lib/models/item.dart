@@ -16,6 +16,7 @@ class Item {
   }
 }
 
+
 Future<List<Item>> fetchItemsFromFirestore() async {
   try {
     QuerySnapshot querySnapshot =
@@ -26,3 +27,4 @@ Future<List<Item>> fetchItemsFromFirestore() async {
     return [];
   }
 }
+
